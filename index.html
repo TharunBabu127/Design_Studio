@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HygieSense - Real-time Hygiene Monitoring System. Smart restroom cleanliness tracking with IoT simulation.">
+    <title>HygieSense | Real-time Hygiene Monitoring System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Alert Banner -->
+    <div class="alert-banner" id="alertBanner" style="display:none;">
+        <div class="alert-banner-content">
+            <div class="alert-icon">⚠</div>
+            <div class="alert-text">
+                <strong id="alertTitle">0 Restrooms Require Immediate Attention</strong>
+                <p id="alertSubtitle">High volume of "Needs Cleaning" reports detected. Dispatch cleaning staff immediately.</p>
+            </div>
+        </div>
+        <button class="alert-close" id="alertClose" aria-label="Close alert">&times;</button>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="appHeader">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                        <rect width="40" height="40" rx="8" fill="#1a1a2e"/>
+                        <rect x="8" y="8" width="10" height="10" rx="2" fill="#4ade80"/>
+                        <rect x="22" y="8" width="10" height="10" rx="2" fill="#4ade80" opacity=".6"/>
+                        <rect x="8" y="22" width="10" height="10" rx="2" fill="#4ade80" opacity=".6"/>
+                        <rect x="22" y="22" width="10" height="10" rx="2" fill="#4ade80" opacity=".3"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>HygieSense</h1>
+                    <p>Real-time Hygiene Monitoring System</p>
+                </div>
+            </div>
+        </div>
+        <div class="header-right">
+            <!-- Notification Bell -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button class="notif-bell" id="notifBell" aria-label="Notifications">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <div class="notif-dropdown" id="notifDropdown" style="display:none;">
+                    <div class="notif-header"><h4>Notifications</h4><button id="notifClearAll">Clear All</button></div>
+                    <div class="notif-list" id="notifList"><p class="notif-empty">No notifications</p></div>
+                </div>
+            </div>
+            <!-- Dark Mode Toggle -->
+            <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">
+                <span class="toggle-icon" id="toggleIcon">🌙</span>
+            </button>
+            <!-- Nav Tabs -->
+            <nav class="header-nav">
+                <button class="nav-btn active" data-view="live">Live Overview</button>
+                <button class="nav-btn" data-view="kiosk">User Kiosk</button>
+                <button class="nav-btn" data-view="history">History Log</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- ===== LIVE OVERVIEW ===== -->
+        <div class="view active" id="viewLive">
+
+            <!-- KPI Stats Bar -->
+            <div class="kpi-bar" id="kpiBar">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+                    <div class="kpi-info"><span class="kpi-label">Total Reports Today</span><span class="kpi-value" id="kpiTotalReports">0</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+                    <div class="kpi-info"><span class="kpi-label">Cleanliness Score</span><span class="kpi-value" id="kpiCleanScore">100%</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon orange"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                    <div class="kpi-info"><span class="kpi-label">Avg Response Time</span><span class="kpi-value" id="kpiAvgResponse">--</span></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div class="kpi-info"><span class="kpi-label">Active Staff</span><span class="kpi-value" id="kpiActiveStaff">4 / 4</span></div>
+                </div>
+            </div>
+
+            <!-- Auto Demo Banner -->
+            <div class="demo-banner" id="demoBanner">
+                <div class="demo-info">
+                    <span class="demo-dot"></span>
+                    <strong>Auto-Demo Mode</strong>
+                    <span>Simulates realistic restroom activity for presentations</span>
+                </div>
+                <button class="demo-btn" id="btnToggleDemo">▶ Start Demo</button>
+            </div>
+
+            <!-- Section Header -->
+            <section class="section-header">
+                <div class="section-title"><span class="pulse-dot"></span><h2>Live Status</h2></div>
+                <div class="auto-refresh">Auto-refreshing (<span id="refreshCountdown">5</span>s)</div>
+            </section>
+
+            <!-- Restroom Cards -->
+            <div class="restroom-cards" id="restroomCards"></div>
+
+            <!-- Bottom Grid -->
+            <div class="bottom-grid">
+                <!-- Chart -->
+                <div class="card chart-card">
+                    <h3>Today's Feedback Distribution</h3>
+                    <div class="chart-container"><canvas id="feedbackChart"></canvas></div>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-color green"></span> Clean Reports</span>
+                        <span class="legend-item"><span class="legend-color red"></span> Needs Attention</span>
+                    </div>
+                </div>
+                <!-- Simulation Control -->
+                <div class="card simulation-card">
+                    <h3><span class="sim-dot"></span> Simulation Control</h3>
+                    <p class="sim-description">Manually trigger IoT device signals for testing.</p>
+                    <label class="sim-label">SELECT LOCATION</label>
+                    <div class="select-wrapper">
+                        <select id="simLocation"></select>
+                        <span class="select-arrow">▾</span>
+                    </div>
+                    <div class="sim-buttons">
+                        <button class="sim-btn clean" id="btnReportClean">✓ Report Clean</button>
+                        <button class="sim-btn issue" id="btnReportIssue">⚠ Report Issue</button>
+                    </div>
+                    <div class="threshold-section">
+                        <h4>Alert Threshold</h4>
+                        <p class="threshold-desc">Dirty reports before auto-dispatching cleaning staff.</p>
+                        <div class="threshold-control">
+                            <button class="threshold-btn" id="thresholdDown">−</button>
+                            <span class="threshold-value" id="thresholdValue">3</span>
+                            <button class="threshold-btn" id="thresholdUp">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staff + Activity Row -->
+            <div class="staff-activity-grid">
+                <!-- Staff Management -->
+                <div class="card staff-card">
+                    <h3>👷 Cleaning Staff</h3>
+                    <div class="staff-list" id="staffList"></div>
+                </div>
+                <!-- Peak Hours -->
+                <div class="card peak-card">
+                    <h3>📊 Peak Hours Heatmap</h3>
+                    <p class="peak-desc">Restroom issue frequency by hour (simulated)</p>
+                    <div class="peak-grid" id="peakGrid"></div>
+                </div>
+                <!-- Live Activity Feed -->
+                <div class="card activity-card">
+                    <h3>⚡ Live Activity Feed</h3>
+                    <div class="activity-list" id="activityFeed">
+                        <p class="activity-empty">Waiting for events...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dispatch Notifications -->
+            <div class="dispatch-section" id="dispatchSection" style="display:none;">
+                <h3>🚨 Active Dispatch Notifications</h3>
+                <div class="dispatch-list" id="dispatchList"></div>
+            </div>
+        </div>
+
+        <!-- ===== USER KIOSK VIEW ===== -->
+        <div class="view" id="viewKiosk">
+            <div class="kiosk-container">
+                <div class="kiosk-header">
+                    <div class="kiosk-logo">
+                        <svg width="48" height="48" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1a1a2e"/><rect x="8" y="8" width="10" height="10" rx="2" fill="#4ade80"/><rect x="22" y="8" width="10" height="10" rx="2" fill="#4ade80" opacity=".6"/><rect x="8" y="22" width="10" height="10" rx="2" fill="#4ade80" opacity=".6"/><rect x="22" y="22" width="10" height="10" rx="2" fill="#4ade80" opacity=".3"/></svg>
+                    </div>
+                    <h2>How was the restroom?</h2>
+                    <p>Your feedback helps us keep facilities clean</p>
+                    <div class="kiosk-location">
+                        <label>Simulating Kiosk at:</label>
+                        <select id="kioskLocation"></select>
+                    </div>
+                </div>
+                <div class="kiosk-buttons">
+                    <button class="kiosk-btn clean" id="kioskClean">
+                        <span class="kiosk-emoji">😊</span>
+                        <span class="kiosk-btn-label">Clean</span>
+                        <span class="kiosk-btn-sub">Everything looks good</span>
+                    </button>
+                    <button class="kiosk-btn dirty" id="kioskDirty">
+                        <span class="kiosk-emoji">😟</span>
+                        <span class="kiosk-btn-label">Needs Cleaning</span>
+                        <span class="kiosk-btn-sub">Please send someone</span>
+                    </button>
+                </div>
+                <div class="kiosk-thankyou" id="kioskThankYou" style="display:none;">
+                    <div class="thankyou-icon">✓</div>
+                    <h3>Thank You!</h3>
+                    <p>Your feedback has been recorded.</p>
+                </div>
+                <div class="kiosk-footer">
+                    <p>This screen simulates a touchscreen kiosk placed at restroom entrances.</p>
+                    <div class="qr-box" id="qrBox">
+                        <div class="qr-pattern"></div>
+                        <span>Scan to report via phone</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HISTORY LOG ===== -->
+        <div class="view" id="viewHistory">
+            <section class="section-header">
+                <div class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <h2>History Log</h2>
+                </div>
+                <div class="history-controls">
+                    <div class="filter-group">
+                        <label>Location:</label>
+                        <select id="historyFilterLocation"><option value="all">All</option></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Type:</label>
+                        <select id="historyFilterType">
+                            <option value="all">All</option>
+                            <option value="clean">Clean</option>
+                            <option value="dirty">Dirty</option>
+                            <option value="dispatch">Dispatch</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                    <button class="export-btn" id="btnExportCSV">📥 Export CSV</button>
+                    <button class="clear-history-btn" id="btnClearHistory">🗑 Clear</button>
+                </div>
+            </section>
+            <div class="history-table-wrapper">
+                <table class="history-table" id="historyTable">
+                    <thead><tr><th>Time</th><th>Location</th><th>Event</th><th>Status</th><th>Details</th></tr></thead>
+                    <tbody id="historyBody"><tr class="empty-row"><td colspan="5">No history records yet. Use Simulation Control to generate events.</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Dispatch Modal -->
+    <div class="modal-overlay" id="dispatchModal" style="display:none;">
+        <div class="modal">
+            <div class="modal-icon">🚨</div>
+            <h3 id="modalTitle">Cleaning Staff Dispatched!</h3>
+            <p id="modalMessage">Threshold reached. Automatic dispatch initiated.</p>
+            <div class="modal-details" id="modalDetails"></div>
+            <div class="modal-actions">
+                <button class="modal-btn resolve" id="modalResolve">✓ Mark Resolved</button>
+                <button class="modal-btn dismiss" id="modalDismiss">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
